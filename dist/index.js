@@ -2,7 +2,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectToMongoDB, connectPrisma } from "./config/db.js";
+import { connectMongo, connectPrisma } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 dotenv.config();
 const app = express();
@@ -15,7 +15,7 @@ app.get("/health", (req, res) => {
     res.json({ status: "ok", message: "Service is running" });
 });
 const start = async () => {
-    await connectToMongoDB();
+    await connectMongo();
     await connectPrisma();
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
