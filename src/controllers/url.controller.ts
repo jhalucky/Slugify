@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { prisma } from '../config/db.js'
+import { prisma, redis } from '../config/db.js'
 import { generateSlug } from '../utils/generateSlug.js'
 
 // Create short URL
@@ -15,7 +15,13 @@ export const createUrl = async (req: Request, res: Response) => {
   try {
     const slug = customSlug || generateSlug()
 
-    // check if slug already exists
+    // check if slug already exists in cache or DB
+    const cached = await redis.get(`url:${slug}`)
+    if (cached) {
+      res.status(400).json({ error: 'Slug already taken, try a different one' })
+      return
+    }
+
     const existing = await prisma.url.findUnique({ where: { slug } })
     if (existing) {
       res.status(400).json({ error: 'Slug already taken, try a different one' })
@@ -30,6 +36,9 @@ export const createUrl = async (req: Request, res: Response) => {
         expiresAt: expiresAt ? new Date(expiresAt) : null
       }
     })
+
+    // cache the new URL right away
+    await redis.set(`url:${slug}`, url.original, { EX: 86400 })
 
     res.status(201).json({
       message: 'Short URL created ✅',
@@ -48,6 +57,16 @@ export const redirectUrl = async (req: Request, res: Response) => {
   const { slug } = req.params as { slug: string }
 
   try {
+    // 1. Check Redis first
+    const cached = await redis.get(`url:${slug}`)
+    if (cached) {
+      console.log('Cache hit ⚡')
+      res.redirect(typeof cached === 'string' ? cached : cached.toString())
+      return
+    }
+
+    // 2. Cache miss — hit PostgreSQL
+    console.log('Cache miss 🐢')
     const url = await prisma.url.findUnique({ where: { slug } })
 
     if (!url) {
@@ -55,11 +74,13 @@ export const redirectUrl = async (req: Request, res: Response) => {
       return
     }
 
-    // check expiry
     if (url.expiresAt && new Date() > url.expiresAt) {
       res.status(410).json({ error: 'This URL has expired' })
       return
     }
+
+    // 3. Cache it for next time (24 hours)
+    await redis.set(`url:${slug}`, url.original, { EX: 86400 })
 
     res.redirect(url.original)
   } catch (error) {
@@ -85,25 +106,26 @@ export const getUserUrls = async (req: Request, res: Response) => {
 
 // Delete a URL
 export const deleteUrl = async (req: Request, res: Response) => {
-  const { slug } = req.params
+  const { slug } = req.params as { slug: string }
   const user = (req as any).user
 
   try {
-    const url = await prisma.url.findUnique({ where: { slug: slug as string } })
+    const url = await prisma.url.findUnique({ where: { slug } })
 
     if (!url) {
       res.status(404).json({ error: 'URL not found' })
       return
     }
 
-    // make sure user owns this URL
     if (url.userId !== user.id) {
       res.status(403).json({ error: 'Not authorized' })
       return
     }
 
-    await prisma.url.delete({ where: { slug: slug as string
-     } })
+    // delete from DB and cache both
+    await prisma.url.delete({ where: { slug } })
+    await redis.del(`url:${slug}`)
+
     res.json({ message: 'URL deleted ✅' })
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' })
