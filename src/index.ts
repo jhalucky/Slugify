@@ -6,6 +6,8 @@ import { connect } from "node:http2";
 import { connectToMongoDB, connectPrisma } from "./config/db.js";
 import { log } from "node:console";
 import authRoutes from "./routes/auth.routes.js";
+import urlRoutes from './routes/url.routes.js'
+import { redirectUrl } from './controllers/url.controller.js'
 
 dotenv.config();
 
@@ -17,6 +19,8 @@ app.use(helmet())
    .use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/urls", urlRoutes);
+app.get("/:slug", redirectUrl);
 
 app.get("/health", (req, res)=> {
     res.json({ status: "ok", message: "Service is running" });
