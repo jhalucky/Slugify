@@ -3,27 +3,33 @@ import { signIn, useSession } from 'next-auth/react'
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const redirected = useRef(false)
 
-  useEffect(() => {
-    if (status === 'authenticated' && session && !redirected.current) {
-      redirected.current = true
-      // store apiKey from session into localStorage
-      const apiKey = (session as any).apiKey
-      if (apiKey) {
-        localStorage.setItem('slugify_api_key', apiKey)
-        localStorage.setItem('slugify_user', JSON.stringify({
-          email: session.user?.email,
-          name: session.user?.name,
-        }))
-      }
-      window.location.href = '/dashboard'
+useEffect(() => {
+  if (status === 'authenticated' && session && !redirected.current) {
+    redirected.current = true
+    const apiKey = (session as any).apiKey
+    if (apiKey) {
+      localStorage.setItem('slugify_api_key', apiKey)
+      localStorage.setItem('slugify_user', JSON.stringify({
+        email: session.user?.email,
+        name: session.user?.name,
+      }))
+      // wait for localStorage to settle then redirect
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 100)
+    } else {
+      // no apiKey in session — something went wrong with backend
+      toast.error('Auth failed — no API key returned')
     }
-  }, [session, status])
+  }
+}, [session, status])
 
   return (
     <main className="min-h-screen bg-[#080808] flex items-center justify-center p-6 relative overflow-hidden">
