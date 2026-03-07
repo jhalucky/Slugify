@@ -5,14 +5,16 @@ import Click from '../models/Click.js'
 export const startAnalyticsWorker = () => {
   const worker = new Worker('analytics', async (job) => {
     if (job.name === 'click') {
-      const { slug, originalUrl, ip, userAgent, referer } = job.data
+      const { slug, originalUrl, ip, userAgent, referer, visitorId } = job.data
 
       await Click.create({
         slug,
         originalUrl,
         ip,
         userAgent,
-        referer
+        referer,
+        visitorId,
+        timestamp: new Date()
       })
 
       console.log(`Click tracked for slug: ${slug} ✅`)

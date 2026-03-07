@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { prisma, redis } from '../config/db.js'
 import { generateSlug } from '../utils/generateSlug.js'
+import { randomBytes } from 'node:crypto'
+import { addClickJob } from '../queues/analytics.queue.js'
 
 // Create short URL
 export const createUrl = async (req: Request, res: Response) => {
@@ -56,12 +58,34 @@ export const createUrl = async (req: Request, res: Response) => {
 export const redirectUrl = async (req: Request, res: Response) => {
   const { slug } = req.params as { slug: string }
 
+  // get or generate visitor ID
+  let visitorId = req.cookies?.visitorId
+  if (!visitorId) {
+    visitorId = randomBytes(16).toString('hex')
+    res.cookie('visitorId', visitorId, {
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+      httpOnly: true
+    })
+  }
+
   try {
     // 1. Check Redis first
     const cached = await redis.get(`url:${slug}`)
     if (cached) {
       console.log('Cache hit ⚡')
-      res.redirect(typeof cached === 'string' ? cached : cached.toString())
+      const cachedUrl = typeof cached === 'string' ? cached : cached.toString()
+
+      // fire analytics job async
+      addClickJob({
+        slug,
+        originalUrl: cachedUrl,
+        ip: req.ip ?? '',
+        userAgent: req.headers['user-agent'] ?? '',
+        referer: req.headers['referer'] ?? '',
+        visitorId
+      })
+
+      res.redirect(cachedUrl)
       return
     }
 
@@ -81,6 +105,16 @@ export const redirectUrl = async (req: Request, res: Response) => {
 
     // 3. Cache it for next time (24 hours)
     await redis.set(`url:${slug}`, url.original, { EX: 86400 })
+
+    // fire analytics job async — on cache miss too!
+    addClickJob({
+      slug,
+      originalUrl: url.original,
+      ip: req.ip ?? '',
+      userAgent: req.headers['user-agent'] ?? '',
+      referer: req.headers['referer'] ?? '',
+      visitorId
+    })
 
     res.redirect(url.original)
   } catch (error) {

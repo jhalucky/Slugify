@@ -11,6 +11,7 @@ export const addClickJob = async (data: {
   ip: string
   userAgent: string
   referer: string
+  visitorId: string
 }) => {
   await analyticsQueue.add('click', data)
 }

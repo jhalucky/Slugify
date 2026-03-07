@@ -6,6 +6,7 @@ const clickSchema = new mongoose.Schema({
   ip: { type: String },
   userAgent: { type: String },
   referer: { type: String },
+  visitorId: { type: String },
   timestamp: { type: Date, default: Date.now }
 })
 
