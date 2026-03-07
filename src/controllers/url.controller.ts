@@ -44,7 +44,7 @@ export const createUrl = async (req: Request, res: Response) => {
 
     res.status(201).json({
       message: 'Short URL created ✅',
-      shortUrl: `http://localhost:3000/${url.slug}`,
+      shortUrl: `${process.env.BASE_URL}/${slug}`,
       slug: url.slug,
       original: url.original,
       expiresAt: url.expiresAt
