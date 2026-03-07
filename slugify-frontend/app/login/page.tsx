@@ -1,15 +1,17 @@
 'use client'
 import { signIn, useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const redirected = useRef(false)
 
   useEffect(() => {
-    if (status === 'authenticated' && session) {
+    if (status === 'authenticated' && session && !redirected.current) {
+      redirected.current = true
       // store apiKey from session into localStorage
       const apiKey = (session as any).apiKey
       if (apiKey) {
