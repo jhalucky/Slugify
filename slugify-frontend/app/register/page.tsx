@@ -20,7 +20,7 @@ export default function RegisterPage() {
           name: session.user?.name,
         }))
       }
-      router.push('/dashboard')
+      window.location.href = '/dashboard'
     }
   }, [session, status])
 
