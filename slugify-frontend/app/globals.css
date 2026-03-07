@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --purple: #9333ea;
+  --purple-dim: #7c22d4;
+  --purple-glow: rgba(147, 51, 234, 0.15);
+  --purple-faint: rgba(147, 51, 234, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: #080808;
+  color: #f0f0f0;
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #080808; }
+::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #9333ea; }
+
+/* selection */
+::selection { background: rgba(147,51,234,0.3); color: white; }
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #f0f0f0 0%, #9333ea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(147,51,234,0.3);
+  }
+
+  .border-purple-subtle {
+    border: 1px solid rgba(147,51,234,0.2);
+  }
+
+  .bg-purple-faint {
+    background: rgba(147,51,234,0.06);
+  }
+
+  .grid-bg {
+    background-image: linear-gradient(rgba(147,51,234,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(147,51,234,0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-up { animation: fadeUp 0.6s ease both; }
+.animate-fade-up-1 { animation: fadeUp 0.6s 0.1s ease both; }
+.animate-fade-up-2 { animation: fadeUp 0.6s 0.2s ease both; }
+.animate-fade-up-3 { animation: fadeUp 0.6s 0.3s ease both; }
+.animate-fade-up-4 { animation: fadeUp 0.6s 0.4s ease both; }
