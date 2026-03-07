@@ -58,3 +58,16 @@ export const getMe = async (req: Request, res: Response) => {
     }
 
 };
+
+export const loginGoogle = async (req: Request, res: Response) => {
+  const { email } = req.body
+  if (!email) { res.status(400).json({ error: 'Email required' }); return }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) { res.status(404).json({ error: 'User not found' }); return }
+    res.json({ apiKey: user.apiKey })
+  } catch {
+    res.status(500).json({ error: 'Something went wrong' })
+  }
+}
