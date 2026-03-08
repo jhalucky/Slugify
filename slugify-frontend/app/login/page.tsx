@@ -23,7 +23,7 @@ useEffect(() => {
       // wait for localStorage to settle then redirect
       setTimeout(() => {
         window.location.href = '/dashboard'
-      }, 100)
+      }, 10)
     } else {
       // no apiKey in session — something went wrong with backend
       toast.error('Auth failed — no API key returned')
