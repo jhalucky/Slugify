@@ -1,49 +1,41 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false)
+  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     setMounted(true)
+    // Check if already logged in
+    import('next-auth/react').then(({ getSession }) => {
+      getSession().then((session) => {
+        if (session) {
+          const apiKey = (session as any).apiKey
+          if (apiKey) {
+            localStorage.setItem('slugify_api_key', apiKey)
+            localStorage.setItem('slugify_user', JSON.stringify({
+              email: session.user?.email,
+              name: session.user?.name,
+            }))
+            window.location.href = '/dashboard'
+            return
+          }
+        }
+        setChecking(false)
+      })
+    })
   }, [])
 
-  if (!mounted) {
+  const handleSignIn = () => {
+    import('next-auth/react').then(({ signIn }) => signIn('google'))
+  }
+
+  if (!mounted || checking) {
     return (
       <main className="min-h-screen bg-[#080808] flex items-center justify-center">
         <p className="font-mono text-[#444] text-sm animate-pulse">Loading...</p>
-      </main>
-    )
-  }
-
-  return <LoginContent />
-}
-
-function LoginContent() {
-  const { useSession, signIn } = require('next-auth/react')
-  const { data: session, status } = useSession()
-  const redirected = useRef(false)
-
-  useEffect(() => {
-    if (status === 'authenticated' && session && !redirected.current) {
-      redirected.current = true
-      const apiKey = (session as any).apiKey
-      if (apiKey) {
-        localStorage.setItem('slugify_api_key', apiKey)
-        localStorage.setItem('slugify_user', JSON.stringify({
-          email: session.user?.email,
-          name: session.user?.name,
-        }))
-        setTimeout(() => { window.location.href = '/dashboard' }, 100)
-      }
-    }
-  }, [session, status])
-
-  if (status === 'loading') {
-    return (
-      <main className="min-h-screen bg-[#080808] flex items-center justify-center">
-        <p className="font-mono text-[#444] text-sm animate-pulse">Signing you in...</p>
       </main>
     )
   }
@@ -61,7 +53,7 @@ function LoginContent() {
           <p className="text-[#666] text-sm">Sign in to manage your links.</p>
         </div>
         <button
-          onClick={() => signIn('google')}
+          onClick={handleSignIn}
           className="w-full flex items-center justify-center gap-3 bg-[#0f0f0f] hover:bg-[#1a1a1a] border border-[#2e2e2e] hover:border-purple-500/40 text-[#f0f0f0] py-3.5 rounded-xl font-sans font-medium text-sm transition-all"
         >
           <svg width="18" height="18" viewBox="0 0 24 24">
