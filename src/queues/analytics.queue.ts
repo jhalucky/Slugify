@@ -1,8 +1,8 @@
 import { Queue } from 'bullmq'
-import { redis } from '../config/db.js'
+import { bullConnection } from '../config/bullmq.js'
 
 export const analyticsQueue = new Queue('analytics', {
-  connection: redis as any
+  connection: bullConnection as any,
 })
 
 export const addClickJob = async (data: {
@@ -13,5 +13,8 @@ export const addClickJob = async (data: {
   referer: string
   visitorId: string
 }) => {
-  await analyticsQueue.add('click', data)
+  await analyticsQueue.add('click', data, {
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 1000 },
+  })
 }
