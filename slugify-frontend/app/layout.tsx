@@ -3,8 +3,12 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
-  title: 'Slugify — Links that mean something',
+  title: 'Slugify - Links that mean something',
   description: 'Shorten, track, and understand every click. Built for developers.',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/logo512.png',
+  }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
