@@ -1,11 +1,27 @@
 'use client'
-import { signIn, useSession } from 'next-auth/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
-
 export default function RegisterPage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-[#080808] flex items-center justify-center">
+        <p className="font-mono text-[#444] text-sm animate-pulse">Loading...</p>
+      </main>
+    )
+  }
+
+  return <RegisterContent />
+}
+
+function RegisterContent() {
+  const { useSession, signIn } = require('next-auth/react')
   const { data: session, status } = useSession()
   const redirected = useRef(false)
 
@@ -35,18 +51,15 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-[#080808] flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[radial-gradient(circle,rgba(147,51,234,0.08)_0%,transparent_70%)] pointer-events-none" />
-
       <div className="w-full max-w-md relative z-10">
         <Link href="/" className="flex items-center gap-2 font-display font-black text-lg mb-10">
           <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_12px_#9333ea]" />
           Slugify
         </Link>
-
         <div className="mb-8">
           <h1 className="font-display font-black text-3xl md:text-4xl tracking-tight mb-2">Create account</h1>
           <p className="text-[#666] text-sm">Start shortening links in seconds.</p>
         </div>
-
         <button
           onClick={() => signIn('google')}
           className="w-full flex items-center justify-center gap-3 bg-[#0f0f0f] hover:bg-[#1a1a1a] border border-[#2e2e2e] hover:border-purple-500/40 text-[#f0f0f0] py-3.5 rounded-xl font-sans font-medium text-sm transition-all"
@@ -59,18 +72,15 @@ export default function RegisterPage() {
           </svg>
           Continue with Google
         </button>
-
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-[#1c1c1c]" />
           <span className="text-[#333] font-mono text-xs">that's it!</span>
           <div className="flex-1 h-px bg-[#1c1c1c]" />
         </div>
-
         <p className="text-[#333] text-xs font-mono text-center leading-relaxed">
           We use Google to verify your identity.<br />
           No passwords. No nonsense.
         </p>
-
         <p className="text-[#444] text-xs font-mono mt-6 text-center">
           Already have an account?{' '}
           <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors">Login →</Link>

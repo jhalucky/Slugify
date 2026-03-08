@@ -1,14 +1,28 @@
 'use client'
-import { signIn, useSession } from 'next-auth/react'
-import { useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
-
 export default function LoginPage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-[#080808] flex items-center justify-center">
+        <p className="font-mono text-[#444] text-sm animate-pulse">Loading...</p>
+      </main>
+    )
+  }
+
+  return <LoginContent />
+}
+
+function LoginContent() {
+  const { useSession, signIn } = require('next-auth/react')
   const { data: session, status } = useSession()
-  const router = useRouter()
   const redirected = useRef(false)
 
   useEffect(() => {
@@ -37,18 +51,15 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#080808] flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[radial-gradient(circle,rgba(147,51,234,0.08)_0%,transparent_70%)] pointer-events-none" />
-
       <div className="w-full max-w-md relative z-10">
         <Link href="/" className="flex items-center gap-2 font-display font-black text-lg mb-10 text-[#f0f0f0]">
           <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_12px_#9333ea]" />
           Slugify
         </Link>
-
         <div className="mb-8">
           <h1 className="font-display font-black text-3xl md:text-4xl tracking-tight mb-2">Welcome back</h1>
           <p className="text-[#666] text-sm">Sign in to manage your links.</p>
         </div>
-
         <button
           onClick={() => signIn('google')}
           className="w-full flex items-center justify-center gap-3 bg-[#0f0f0f] hover:bg-[#1a1a1a] border border-[#2e2e2e] hover:border-purple-500/40 text-[#f0f0f0] py-3.5 rounded-xl font-sans font-medium text-sm transition-all"
@@ -61,7 +72,6 @@ export default function LoginPage() {
           </svg>
           Continue with Google
         </button>
-
         <p className="text-[#444] text-xs font-mono mt-6 text-center">
           No account?{' '}
           <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors">Register →</Link>
