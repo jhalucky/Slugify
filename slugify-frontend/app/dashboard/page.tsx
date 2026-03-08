@@ -33,16 +33,14 @@ export default function DashboardPage() {
   const [qrUrl, setQrUrl] = useState<Url | null>(null)
   const [user, setUser] = useState<{ name?: string; email: string } | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
 
-useEffect(() => {
-  setMounted(true)
-  const key = localStorage.getItem('slugify_api_key')
-  if (!key) { router.push('/login'); return }
-  const u = localStorage.getItem('slugify_user')
-  if (u) setUser(JSON.parse(u))
-  fetchData()
-}, [])
+  useEffect(() => {
+    const key = localStorage.getItem('slugify_api_key')
+    if (!key) { router.push('/login'); return }
+    const u = localStorage.getItem('slugify_user')
+    if (u) setUser(JSON.parse(u))
+    fetchData()
+  }, [])
 
   const fetchData = async () => {
     try {
@@ -104,12 +102,6 @@ useEffect(() => {
   const getClicks = (slug: string) => {
     return overview?.clicksPerSlug?.find(c => c._id === slug)?.count || 0
   }
-
-  if (!mounted) return (
-  <main className="min-h-screen bg-[#080808] flex items-center justify-center">
-    <p className="font-mono text-[#444] text-sm animate-pulse">Loading...</p>
-  </main>
-)
 
   return (
     <main className="min-h-screen bg-[#080808] text-[#f0f0f0]">

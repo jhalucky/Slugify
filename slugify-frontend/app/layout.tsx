@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
-import NextAuthProvider from '../app/components/NextAuthProvider'
 
 export const metadata: Metadata = {
   title: 'Slugify — Links that mean something',
@@ -12,9 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <NextAuthProvider>
-          {children}
-        </NextAuthProvider>
+        {children}
         <Toaster
           position="bottom-right"
           toastOptions={{
