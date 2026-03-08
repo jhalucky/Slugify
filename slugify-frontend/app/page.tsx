@@ -228,7 +228,7 @@ export default function Home() {
       <footer className="border-t border-[#1c1c1c] px-6 md:px-12 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="font-display font-black text-[#444] text-base">Slugify</div>
         <div className="text-xs font-mono text-[#444]">
-          Built by <span className="text-purple-400">Lucky Jha</span> · Open source
+          Built by <span className="text-purple-400 cursor-pointer"><a href="https://luckyworks.in" target="_blank" rel="noopener noreferrer">Lucky Jha</a></span> · Open source
         </div>
       </footer>
     </main>

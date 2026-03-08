@@ -3,6 +3,8 @@ import { signIn, useSession } from 'next-auth/react'
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default function RegisterPage() {
   const { data: session, status } = useSession()
   const redirected = useRef(false)
